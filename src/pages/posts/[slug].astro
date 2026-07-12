@@ -1,0 +1,41 @@
+---
+// 文章详情页 — 根据 URL 中的 slug 找到对应 Markdown 并渲染
+import { getCollection, render } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('posts');
+  return posts.map((post) => ({
+    params: { slug: post.id.replace(/\.md$/, '') },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+---
+
+<Layout title={post.data.title} description={post.data.description}>
+  <article class="post-content">
+    <h1>{post.data.title}</h1>
+    <div class="post-meta">
+      <time>
+        {
+          post.data.date.toLocaleDateString('zh-CN', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          })
+        }
+      </time>
+      {
+        post.data.tags && post.data.tags.length > 0 && (
+          <div class="tags">
+            {post.data.tags.map((tag: string) => <span class="tag">{tag}</span>)}
+          </div>
+        )
+      }
+    </div>
+    <Content />
+  </article>
+</Layout>

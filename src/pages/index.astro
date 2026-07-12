@@ -1,0 +1,69 @@
+---
+// 首页 — 显示所有文章的卡片列表
+import { getCollection } from 'astro:content';
+import Layout from '../layouts/Layout.astro';
+import PostCard from '../components/PostCard.astro';
+
+const posts = await getCollection('posts');
+
+// 按日期降序排列（最新的在前）
+const sortedPosts = posts.sort(
+  (a, b) => b.data.date.getTime() - a.data.date.getTime()
+);
+---
+
+<Layout title="首页">
+  <section class="hero">
+    <h1>👋 欢迎来到我的技术博客</h1>
+    <p>记录学习过程，分享技术心得。</p>
+  </section>
+
+  <section class="post-list">
+    {
+      sortedPosts.length === 0 ? (
+        <p class="empty">还没有文章，敬请期待……</p>
+      ) : (
+        sortedPosts.map((post) => (
+          <PostCard
+            title={post.data.title}
+            description={post.data.description}
+            date={post.data.date.toLocaleDateString('zh-CN', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })}
+            slug={post.id.replace(/\.md$/, '')}
+            tags={post.data.tags || []}
+          />
+        ))
+      )
+    }
+  </section>
+</Layout>
+
+<style>
+  .hero {
+    text-align: center;
+    padding: 2rem 0 3rem;
+  }
+
+  .hero h1 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .hero p {
+    color: var(--color-muted);
+    font-size: 1.1rem;
+  }
+
+  .post-list {
+    margin-top: 1rem;
+  }
+
+  .empty {
+    text-align: center;
+    color: var(--color-muted);
+    padding: 2rem;
+  }
+</style>
